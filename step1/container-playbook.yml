@@ -1,0 +1,26 @@
+---
+- name: Configura un Docker Registry locale
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    ansible_python_interpreter: /usr/local/bin/python3
+
+  tasks:
+    - name: Assicura la presenza dell'immagine del registry
+      community.docker.docker_image:
+        name: registry:2
+        source: pull
+        state: present
+
+    - name: Avvia il container del registry
+      community.docker.docker_container:
+        name: registry
+        image: registry:2
+        state: started
+        restart_policy: always
+        ports:
+          - "5000:5000"
+        volumes:
+          - registry_data:/var/lib/registry
