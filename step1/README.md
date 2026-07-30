@@ -49,7 +49,7 @@ dall'immagine ufficiale `registry:2` ed esposto su `localhost:5000`.
   (`source: pull` la scarica se manca; `state: present` è lo stato desiderato).
 - **docker_container** → crea e avvia il container `registry`:
   - `ports "5000:5000"` mappa la porta del container sull'host → raggiungibile su `localhost:5000`;
-  - `volumes registry_data:/var/lib/registry` rende **persistenti** le immagini pushate;
+  - `volumes registry_data:/var/lib/registry` rende **persistenti** su un volume le immagini pushate;
   - `restart_policy: always` fa ripartire il container dopo un riavvio del demone/host.
 
 ### Esecuzione
@@ -59,19 +59,26 @@ ansible-playbook container-playbook.yml
 ```
 
 ### Verifica
+
 ```bash
 # Il container è attivo con la porta esposta
 docker ps --filter "name=registry"
 
 # L'API del registry risponde (vuoto se non è stato pushato nulla)
 curl http://localhost:5000/v2/_catalog     # -> {"repositories":[]}
+```
+![prima parte terminale](step1_track3/Screenshot%202026-07-30%20alle%2010.46.39.png)
+![prima parte terminale](step1_track3/Screenshot%202026-07-30%20alle%2010.46.19.png)
 
+```bash
 # Prova di push reale
 docker pull hello-world
 docker tag hello-world localhost:5000/hello-world
 docker push localhost:5000/hello-world
 curl http://localhost:5000/v2/_catalog     # -> {"repositories":["hello-world"]}
 ```
+![prima parte terminale](step1_track3/Screenshot%202026-07-30%20alle%2010.48.34.png)
+![prima parte terminale](step1_track3/Screenshot%202026-07-30%20alle%2010.48.27.png)
 
 ### Idempotenza
 Rieseguendo il playbook senza modifiche, il `PLAY RECAP` riporta `changed=0`:
@@ -79,7 +86,7 @@ il registry è già nello stato desiderato e Ansible non modifica nulla.
 
 ---
 
-## Note tecniche / troubleshooting
+## Note tecniche: Come ho risolto un problema
 
 Durante lo Step 1 sono emersi due problemi tipici dell'ambiente locale:
 
@@ -100,6 +107,5 @@ Durante lo Step 1 sono emersi due problemi tipici dell'ambiente locale:
    vars:
      ansible_python_interpreter: /usr/local/bin/python3
    ```
-   ![prima parte terminale](awx2/Screenshot%202026-07-17%20alle%2011.15.18.png)
-   ![prima parte terminale](awx2/Screenshot%202026-07-17%20alle%2011.15.18.png)
-   ![prima parte terminale](awx2/Screenshot%202026-07-17%20alle%2011.15.18.png)
+Il playbook dopo l'esecuzione creava il container `registry` ma non lo faceva partire per le due motivazioni sopracitate.
+Installando la versione compatibile della collection e dichiarando nel playbook l'interprete python che ha l'SDK installato ho risolto i problemi.
