@@ -1,0 +1,38 @@
+FROM {{ item.base_image }}
+
+# 1) openssh-server +sudo (comando specifico per ogni famiglia distro)
+{% if item.family == 'debian' %}
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends openssh-server sudo && \
+    rm -rf /var/lib/apt/lists/*
+{% elif item.family == 'rhel' %}
+RUN dnf install -y openssh-server sudo && \
+    dnf clean all
+{% endif %}
+
+# 2) Utente + sudo SENZA password(disabilito la password , serve NOPASSWD)
+RUN useradd -m -s /bin/bash {{ ssh_user }} && \
+    usermod -aG {{ item.sudo_group }} {{ ssh_user }} && \
+    echo '{{ ssh_user }} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/{{ ssh_user }} && \
+    chmod 440 /etc/sudoers.d/{{ ssh_user }}
+
+# 3) Chiave pubblica in authorized_keys (permessi rigorosi altrimenti sshd rifiuta)
+RUN mkdir -p /home/{{ ssh_user }}/.ssh && chmod 700 /home/{{ ssh_user }}/.ssh
+COPY {{ pubkey_name }} /home/{{ ssh_user }}/.ssh/authorized_keys
+RUN chmod 600 /home/{{ ssh_user }}/.ssh/authorized_keys && \
+    chown -R {{ ssh_user }}:{{ ssh_user }} /home/{{ ssh_user }}/.ssh
+
+# 4) Hardening SSH via drop-in (che include già attivo Ubunto e Rocky)
+RUN mkdir -p /etc/ssh/sshd_config.d && \
+    printf '%s\n' \
+      'PermitRootLogin no' \
+      'PasswordAuthentication no' \
+      'PubkeyAuthentication yes' \
+      'AllowUsers {{ ssh_user }}' \
+      > /etc/ssh/sshd_config.d/00-formazione.conf
+
+# 5. sshd: privilege separation dir + host keys
+RUN mkdir -p /run/sshd && ssh-keygen -A
+
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D", "-e"]

@@ -1,0 +1,62 @@
+---
+- name: Build dei container SSH (Ubuntu e Rocky) 
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: /usr/local/bin/python3
+    ssh_user: gabriele
+    pubkey_name: id_rsa_gabriele.pub
+    containers:
+      - name: formazione-ssh-ubuntu
+        base_image: "ubuntu:22.04"
+        family: debian
+        sudo_group: sudo
+      - name: formazione-ssh-rocky
+        base_image: "rockylinux:9"
+        family: rhel
+        sudo_group: wheel
+
+  tasks:
+    - name: Creo la cartella di contesto per ogni container
+      ansible.builtin.file:
+        path: "build/{{ item.name }}"
+        state: directory
+        mode: "0755"
+      loop: "{{ containers }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Genero il Dockerfile dal template
+      ansible.builtin.template:
+        src: templates/Dockerfile.j2
+        dest: "build/{{ item.name }}/Dockerfile"
+        mode: "0644"
+      loop: "{{ containers }}"
+      loop_control:
+        label: "{{ item.name }}"
+ 
+    - name: Copio la chiave pubblica per la build
+      ansible.builtin.copy:
+        src: "keys/{{ pubkey_name }}"
+        dest: "build/{{ item.name }}/{{ pubkey_name }}"
+        mode: "0644"
+      loop: "{{ containers }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Build dell'immagine Docker
+      community.docker.docker_image:
+        name: "{{ item.name }}"
+        tag: latest
+        source: build
+        force_source: true
+        build:
+          path: "build/{{ item.name }}"
+          dockerfile: Dockerfile
+          pull: true
+        state: present
+      loop: "{{ containers }}"
+      loop_control:
+        label: "{{ item.name }}"
+   

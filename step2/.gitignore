@@ -1,0 +1,4 @@
+# Step2 chiavi ssh da non committare
+keys/id_*
+!keys/id_*.pub
+build/
