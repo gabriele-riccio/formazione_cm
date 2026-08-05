@@ -21,7 +21,7 @@ Il tutto parametrizzato e indipendente dal container engine.
 step3/
 ├── ansible.cfg              # inventory, roles_path
 ├── inventory                # localhost + ansible_python_interpreter
-├── site.yml                 # orchestrazione dei 5 ruoli
+├── site.yml                 # orchestrazione dei 5 ruoli (esegue i cinque ruoli in ordine sequenziale)
 ├── group_vars/
 │   └── all.yml              # variabili condivise (liste immagini/container, registry_host)
 └── roles/
@@ -37,8 +37,8 @@ step3/
 ### detect_engine
 Verifica con `which docker` / `which podman`, imposta i fact
 `docker_installed` / `podman_installed` e sceglie `container_engine`.
-Supporta l'**override** (`-e container_engine=podman`); in assenza, auto-detect.
 Un `assert` blocca l'esecuzione se non è presente nessun engine.
+Viene eseguito per primo: i suoi fact sopravvivono per tutto il play e sono quindi visibili agli altri ruoli.
 
 ### registry
 Pull di `registry:2` e run del container `registry` sulla porta **5000**,
@@ -46,12 +46,12 @@ con volume persistente `registry_data`.
 
 ### build_images
 Genera un `Dockerfile` per ogni immagine da un template Jinja2 (`Dockerfile.j2`)
-con ramo per famiglia OS (`debian`/`rhel`), poi esegue la build.
+con ramo per famiglia OS (`debian` e `rhel`), infine esegue la build.
 Immagini prodotte: `formazione-ssh-ubuntu` (ubuntu:22.04) e
 `formazione-ssh-rocky` (rockylinux:9).
 
 ### push_images
-Tag delle immagini verso `localhost:5000/<nome>` e push sul registry.
+Tag delle immagini verso `localhost:5000/v2/_catalog` e push sul registry.
 
 ### run_containers
 Avvia i container assegnando a ciascuno una **porta host distinta** (8081, 8082),
@@ -66,7 +66,7 @@ Il nome di un modulo non può essere una variabile, quindi ogni ruolo usa un
 - include_tasks: "{{ container_engine }}.yml"
 ```
 
-e contiene due file paralleli: `docker.yml` (moduli `community.docker.*`) e
+che contiene due file paralleli: `docker.yml` (moduli `community.docker.*`) e
 `podman.yml` (moduli `containers.podman.*`). Il ruolo `detect_engine`,
 eseguito per primo, imposta `container_engine`; i fact sopravvivono per tutto
 il play, quindi tutti i ruoli successivi sanno quale ramo usare.
@@ -92,6 +92,10 @@ Aggiungere un container = aggiungere una voce alla lista, senza toccare i task.
 cd step3
 ansible-playbook site.yml
 ```
+### Output
+
+![sesta parte terminale](step3_track3/Screenshot%202026-08-05%20alle%2016.47.00.png)
+![sesta parte terminale](step3_track3/Screenshot%202026-08-05%20alle%2016.48.22.png)
 
 Per forzare Podman (su una macchina che lo abbia):
 
@@ -105,6 +109,7 @@ ansible-playbook site.yml -e container_engine=podman
 docker ps --filter "name=registry" --filter "name=app-"
 curl -s http://localhost:5000/v2/_catalog
 ```
+Su internet `http://localhost:5000/v2/_catalog`
 
-Atteso: container `registry` (5000), `app-ubuntu` (8081→22), `app-rocky`
-(8082→22) attivi; catalogo con `formazione-ssh-ubuntu` e `formazione-ssh-rocky`.
+![sesta parte terminale](step3_track3/Screenshot%202026-08-05%20alle%2012.48.31.png)
+![sesta parte terminale](step3_track3/Screenshot%202026-08-05%20alle%2012.48.39.png)
