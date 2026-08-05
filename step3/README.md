@@ -111,5 +111,5 @@ curl -s http://localhost:5000/v2/_catalog
 ```
 Su internet `http://localhost:5000/v2/_catalog`
 
-![sesta parte terminale](step3_track3/Screenshot%202026-08-05%20alle%2012.48.31.png)
-![sesta parte terminale](step3_track3/Screenshot%202026-08-05%20alle%2012.48.39.png)
+![sesta parte terminale](step3_track3/Screenshot%202026-08-05%20alle%2016.48.31.png)
+![sesta parte terminale](step3_track3/Screenshot%202026-08-05%20alle%2016.48.39.png)
