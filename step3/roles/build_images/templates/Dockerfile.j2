@@ -1,0 +1,9 @@
+FROM {{ item.base_image }}
+
+{% if item.family == 'debian' %}
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+{% elif item.family == 'rhel' %}
+RUN dnf install -y curl && dnf clean all
+{% endif %}
+
+CMD ["sleep", "infinity"]

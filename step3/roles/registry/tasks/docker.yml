@@ -1,0 +1,16 @@
+---
+- name: Eseguo il pull dell'immagine del registry (Docker)
+  community.docker.docker_image:
+    name: "{{ registry_image }}"
+    source: pull
+
+- name: Avvio del container registry (Docker)
+  community.docker.docker_container:
+    name: "{{ registry_name }}"
+    image: "{{ registry_image }}"
+    state: started
+    restart_policy: "{{ registry_restart_policy }}"
+    ports:
+      - "{{ registry_port }}:5000"
+    volumes:
+      - "{{ registry_data_volume }}:/var/lib/registry"

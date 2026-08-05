@@ -1,0 +1,4 @@
+---
+# tasks file for roles/registry
+- name: Eseguo i task del registry per l'engine 
+  ansible.builtin.include_tasks: "{{ container_engine }}.yml"

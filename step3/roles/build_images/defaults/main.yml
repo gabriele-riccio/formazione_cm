@@ -1,0 +1,15 @@
+---
+# defaults file for roles/build_images
+# Lista parametrica delle immagini da buildare.
+# Ogni elemento definisce nome, immagine base e "famiglia" (per il ramo nel Dockerfile).
+
+# build_images_list:
+#   - name: "formazione-ssh-ubuntu"
+#     base_image: "ubuntu:22.04"
+#     family: "debian"
+#   - name: "formazione-ssh-rocky"
+#    base_image: "rockylinux:9"
+#     family: "rhel"
+
+# Dove vengono generati i Dockerfile temporanei
+build_context_dir: "/tmp/formazione_cm_build"

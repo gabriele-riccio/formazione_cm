@@ -1,0 +1,9 @@
+---
+- name: Build delle immagini (Podman)
+  containers.podman.podman_image:
+    name: "{{ item.name }}"
+    tag: latest
+    path: "{{ build_context_dir }}/{{ item.name }}"
+  loop: "{{ build_images_list }}"
+  loop_control:
+    label: "{{ item.name }}"

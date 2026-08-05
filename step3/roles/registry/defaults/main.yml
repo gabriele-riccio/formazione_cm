@@ -1,0 +1,9 @@
+---
+# defaults file for roles/registry
+
+registry_image: "registry:2"
+registry_name: "registry"
+registry_port: 5000
+registry_data_volume: "registry_data"
+registry_restart_policy: "always"
+

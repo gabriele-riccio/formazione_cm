@@ -1,0 +1,15 @@
+---
+- name: Eseguo il pull dell'immagine del registry (Podman)
+  containers.podman.podman_image:
+    name: "{{ registry_image }}"
+
+- name: Avvio del container registry (Podman)
+  containers.podman.podman_container:
+    name: "{{ registry_name }}"
+    image: "{{ registry_image }}"
+    state: started
+    restart_policy: "{{ registry_restart_policy }}"
+    ports:
+      - "{{ registry_port }}:5000"
+    volumes:
+      - "{{ registry_data_volume }}:/var/lib/registry"

@@ -1,0 +1,20 @@
+---
+build_images_list:
+  - name: "formazione-ssh-ubuntu"
+    base_image: "ubuntu:22.04"
+    family: "debian"
+  - name: "formazione-ssh-rocky"
+    base_image: "rockylinux:9"
+    family: "rhel"
+
+registry_host: "localhost:5000"
+run_containers_list:
+  - name: "app-ubuntu"
+    image: "formazione-ssh-ubuntu"
+    host_port: 8081
+    container_port: 22
+  - name: "app-rocky"
+    image: "formazione-ssh-rocky"
+    host_port: 8082
+    container_port: 22
+

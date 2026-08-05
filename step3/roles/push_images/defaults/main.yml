@@ -1,0 +1,4 @@
+---
+# defaults file for roles/push_images
+registry_host: "localhost:5000"
+# Riusa la lista delle immagini definita in build_images tramite group_vars/all.yml

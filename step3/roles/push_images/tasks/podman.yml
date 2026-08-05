@@ -1,0 +1,20 @@
+---
+- name: Tag delle immagini verso il registry (Podman)
+  containers.podman.podman_tag:
+    image: "{{ item.name }}:latest"
+    target_names:
+      - "{{ registry_host }}/{{ item.name }}:latest"
+  loop: "{{ build_images_list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Push delle immagini sul registry (Podman)
+  containers.podman.podman_image:
+    name: "{{ registry_host }}/{{ item.name }}"
+    tag: latest
+    push: true
+    push_args:
+      dest: "{{ registry_host }}/{{ item.name }}:latest"
+  loop: "{{ build_images_list }}"
+  loop_control:
+    label: "{{ item.name }}"

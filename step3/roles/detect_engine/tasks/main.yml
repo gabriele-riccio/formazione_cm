@@ -1,0 +1,40 @@
+---
+# tasks file for roles/detect_engine
+
+- name: Verifico presenza di Docker
+  ansible.builtin.command: which docker
+  register: docker_check
+  changed_when: false
+  failed_when: false
+
+- name: Verifico presenza di Podman
+  ansible.builtin.command: which podman
+  register: podman_check
+  changed_when: false
+  failed_when: false
+
+- name: Imposto fact docker_installed
+  ansible.builtin.set_fact:
+    docker_installed: "{{ docker_check.rc == 0 }}"
+
+- name: Imposto fact podman_installed
+  ansible.builtin.set_fact:
+    podman_installed: "{{ podman_check.rc == 0 }}"
+
+- name: Determino il container engine da usare
+  ansible.builtin.set_fact:
+    container_engine: >-
+      {{ container_engine
+         | default('docker' if docker_installed
+                   else ('podman' if podman_installed else 'none')) }}
+
+- name: Fallisce se nessun engine è disponibile
+  ansible.builtin.assert:
+    that:
+      - container_engine in ['docker', 'podman']
+    fail_msg: "Nessun container engine trovato (né docker né podman)."
+    success_msg: "Container engine selezionato: {{ container_engine }}"
+
+- name: Riepilogo rilevamento
+  ansible.builtin.debug:
+    msg: "docker={{ docker_installed }} | podman={{ podman_installed }} | engine scelto={{ container_engine }}"

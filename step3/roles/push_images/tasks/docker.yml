@@ -1,0 +1,11 @@
+---
+- name: Tag delle immagini verso il registry (Docker)
+  community.docker.docker_image:
+    name: "{{ item.name }}"
+    repository: "{{ registry_host }}/{{ item.name }}"
+    tag: latest
+    source: local
+    push: true
+  loop: "{{ build_images_list }}"
+  loop_control:
+    label: "{{ item.name }}"
