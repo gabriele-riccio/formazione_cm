@@ -19,20 +19,20 @@ Il tutto parametrizzato e indipendente dal container engine.
 
 ​```
 step3/
-├── ansible.cfg              # inventory, roles_path
-├── inventory                # localhost + ansible_python_interpreter
-├── site.yml                 # orchestrazione dei 5 ruoli
+├── ansible.cfg                    # inventory, roles_path
+├── inventory                      # localhost + ansible_python_interpreter
+├── site.yml                       # orchestrazione dei 5 ruoli
 ├── group_vars/
-│   └── all.yml              # variabili condivise (liste immagini/container, registry_host)
-└── roles/
-    ├── detect_engine/       # rileva docker/podman, sceglie container_engine
-    ├── registry/            # registry:2 sulla porta 5000
-    ├── build_images/        # build da template Dockerfile.j2
-    ├── push_images/         # tag + push verso il registry
-    └── run_containers/      # run su porte host distinte
+│   └── all.yml                    # variabili condivise ( liste immagini/container, registry_host)
+├── roles/
+│   ├── detect_engine/             # rileva docker/podman, sceglie container_engine
+│   ├── registry/                  # registry:2 sulla porta 5000
+│   ├── build_images/              # build da template Dockerfile.j2
+│   ├── push_images                # tag + push verso il registry  
+│   └── run_containers             # run su porte host distinte
+└── README.md
 ​```
-
-## I ruoli
+### Ruoli:
 
 ### detect_engine
 Verifica con `which docker` / `which podman`, imposta i fact
