@@ -114,19 +114,3 @@ Atteso: container `registry` (5000), `app-ubuntu` (8081→22), `app-rocky`
 Una seconda esecuzione di `site.yml` senza modifiche produce `changed=0`:
 i ruoli sono dichiarativi (registry già su, immagini già presenti,
 container già attivi).
-
-## Pulizia
-
-​```bash
-docker rm -f registry app-ubuntu app-rocky
-docker volume rm registry_data
-​```
-
-## Requisiti soddisfatti
-
-- [x] Registry creato e configurato via ruolo
-- [x] Build di due container con OS differenti
-- [x] Push delle immagini sul registry
-- [x] Run senza conflitto di porte
-- [x] Parametrizzazione completa (group_vars)
-- [x] Ruoli compatibili Docker e Podman
