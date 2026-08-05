@@ -17,22 +17,22 @@ Il tutto parametrizzato e indipendente dal container engine.
 
 ## Struttura del progetto
 
-​```
+```
 step3/
-├── ansible.cfg                    # inventory, roles_path
-├── inventory                      # localhost + ansible_python_interpreter
-├── site.yml                       # orchestrazione dei 5 ruoli
+├── ansible.cfg              # inventory, roles_path
+├── inventory                # localhost + ansible_python_interpreter
+├── site.yml                 # orchestrazione dei 5 ruoli
 ├── group_vars/
-│   └── all.yml                    # variabili condivise ( liste immagini/container, registry_host)
-├── roles/
-│   ├── detect_engine/             # rileva docker/podman, sceglie container_engine
-│   ├── registry/                  # registry:2 sulla porta 5000
-│   ├── build_images/              # build da template Dockerfile.j2
-│   ├── push_images                # tag + push verso il registry  
-│   └── run_containers             # run su porte host distinte
-└── README.md
-​```
-### Ruoli:
+│   └── all.yml              # variabili condivise (liste immagini/container, registry_host)
+└── roles/
+    ├── detect_engine/       # rileva docker/podman, sceglie container_engine
+    ├── registry/            # registry:2 sulla porta 5000
+    ├── build_images/        # build da template Dockerfile.j2
+    ├── push_images/         # tag + push verso il registry
+    └── run_containers/      # run su porte host distinte
+```
+
+## I ruoli
 
 ### detect_engine
 Verifica con `which docker` / `which podman`, imposta i fact
@@ -62,9 +62,9 @@ evitando conflitti. Le porte sono parametriche.
 Il nome di un modulo non può essere una variabile, quindi ogni ruolo usa un
 **dispatcher**:
 
-​```yaml
+```yaml
 - include_tasks: "{{ container_engine }}.yml"
-​```
+```
 
 e contiene due file paralleli: `docker.yml` (moduli `community.docker.*`) e
 `podman.yml` (moduli `containers.podman.*`). Il ruolo `detect_engine`,
@@ -88,29 +88,23 @@ Aggiungere un container = aggiungere una voce alla lista, senza toccare i task.
 
 ## Esecuzione
 
-​```bash
+```bash
 cd step3
 ansible-playbook site.yml
-​```
+```
 
 Per forzare Podman (su una macchina che lo abbia):
 
-​```bash
+```bash
 ansible-playbook site.yml -e container_engine=podman
-​```
+```
 
 ## Verifica
 
-​```bash
+```bash
 docker ps --filter "name=registry" --filter "name=app-"
 curl -s http://localhost:5000/v2/_catalog
-​```
+```
 
 Atteso: container `registry` (5000), `app-ubuntu` (8081→22), `app-rocky`
 (8082→22) attivi; catalogo con `formazione-ssh-ubuntu` e `formazione-ssh-rocky`.
-
-## Idempotenza
-
-Una seconda esecuzione di `site.yml` senza modifiche produce `changed=0`:
-i ruoli sono dichiarativi (registry già su, immagini già presenti,
-container già attivi).
