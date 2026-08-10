@@ -1,0 +1,30 @@
+---
+build_images_list:
+  - name: "formazione-ssh-ubuntu"
+    base_image: "ubuntu:22.04"
+    family: "debian"
+  - name: "formazione-ssh-rocky"
+    base_image: "rockylinux:9"
+    family: "rhel"
+
+registry_host: "localhost:5000"
+run_containers_list:
+  - name: "app-ubuntu"
+    image: "formazione-ssh-ubuntu"
+    host_port: 8081
+    container_port: 22
+  - name: "app-rocky"
+    image: "formazione-ssh-rocky"
+    host_port: 8082
+    container_port: 22
+
+
+# Credenziali registry (step4 Ansible Vault)
+registry_user: "admin"
+registry_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          63656133363839626266663234363033323930613163386564626430653430336532643066336631
+          3538373866346337383938313561313532343863376266310a343166623261643231636534623830
+          64333537336566613735656435386566336534373435363939626139646634366335663562376330
+          3538313736383337610a646236613732346236353430646166656134373138306437646163356534
+          6631

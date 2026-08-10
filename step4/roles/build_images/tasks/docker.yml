@@ -1,0 +1,12 @@
+---
+- name: Build delle immagini (Docker)
+  community.docker.docker_image:
+    name: "{{ item.name }}"
+    tag: latest
+    source: build
+    build:
+      path: "{{ build_context_dir }}/{{ item.name }}"
+    state: present
+  loop: "{{ build_images_list }}"
+  loop_control:
+    label: "{{ item.name }}"

@@ -1,0 +1,24 @@
+---
+- name: Genero il file htpasswd per il registry (Docker)
+  ansible.builtin.include_tasks: htpasswd.yml
+
+- name: Eseguo il pull dell'immagine del registry (Docker)
+  community.docker.docker_image:
+    name: "{{ registry_image }}"
+    source: pull
+
+- name: Avvio del container registry con auth basic (Docker)
+  community.docker.docker_container:
+    name: "{{ registry_name }}"
+    image: "{{ registry_image }}"
+    state: started
+    restart_policy: "{{ registry_restart_policy }}"
+    ports:
+      - "{{ registry_port }}:5000"
+    env:
+      REGISTRY_AUTH: "htpasswd"
+      REGISTRY_AUTH_HTPASSWD_REALM: "{{ registry_auth_realm }}"
+      REGISTRY_AUTH_HTPASSWD_PATH: "/auth/htpasswd"
+    volumes:
+      - "{{ registry_data_volume }}:/var/lib/registry"
+      - "{{ registry_auth_dir }}:/auth:ro"

@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  connection: local
+  roles:
+    - detect_engine
+    - registry
+    - build_images
+    - push_images
+    - run_containers

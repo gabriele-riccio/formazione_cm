@@ -1,0 +1,10 @@
+# Artefatti generati (rigenerati dal playbook)
+auth/
+build/
+
+# Vault password: MAI nel repo (vive in ~/.vault)
+.vault
+vault-pass*
+
+# macOS
+.DS_Store

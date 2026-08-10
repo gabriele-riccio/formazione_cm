@@ -1,0 +1,4 @@
+---
+# tasks file for roles/run_containers
+- name: Eseguo il run per l'engine {{ container_engine }}
+  ansible.builtin.include_tasks: "{{ container_engine }}.yml"

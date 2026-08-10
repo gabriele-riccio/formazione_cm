@@ -1,0 +1,17 @@
+---
+# tasks file for roles/build_images
+- name: Preparo la directory di build
+  ansible.builtin.file:
+    path: "{{ build_context_dir }}/{{ item.name }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ build_images_list }}"
+
+- name: Genero il Dockerfile per ciascuna immagine
+  ansible.builtin.template:
+    src: "Dockerfile.j2"
+    dest: "{{ build_context_dir }}/{{ item.name }}/Dockerfile"
+  loop: "{{ build_images_list }}"
+
+- name: Eseguo la build per l'engine {{ container_engine }}
+  ansible.builtin.include_tasks: "{{ container_engine }}.yml"

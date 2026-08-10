@@ -1,0 +1,4 @@
+---
+# tasks file for roles/push_images
+- name: Eseguo il push per l'engine {{ container_engine }}
+  ansible.builtin.include_tasks: "{{ container_engine }}.yml"

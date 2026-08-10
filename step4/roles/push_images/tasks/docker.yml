@@ -1,0 +1,18 @@
+---
+- name: Login al registry con le credenziali cifrate (Docker)
+  community.docker.docker_login:
+    registry_url: "{{ registry_host }}"
+    username: "{{ registry_user }}"
+    password: "{{ registry_password }}"
+  no_log: true
+
+- name: Tag delle immagini verso il registry (Docker)
+  community.docker.docker_image:
+    name: "{{ item.name }}"
+    repository: "{{ registry_host }}/{{ item.name }}"
+    tag: latest
+    source: local
+    push: true
+  loop: "{{ build_images_list }}"
+  loop_control:
+    label: "{{ item.name }}"
