@@ -17,17 +17,21 @@ pipeline {
 
         stage('Build Immagine') {
             steps {
-                script {
-                    docker.build("${FULL_IMAGE}", "-f app/Dockerfile .")
+                dir('step5') {
+                    script {
+                        docker.build("${FULL_IMAGE}", "-f app/Dockerfile .")
+                    }
                 }
             }
         }
 
         stage('Push Immagine su Registry') {
             steps {
-                script {
-                    docker.withRegistry("http://${REGISTRY}", 'registry-credentials') {
-                        docker.image("${FULL_IMAGE}").push()
+                dir('step5') {
+                    script {
+                        docker.withRegistry("http://${REGISTRY}", 'registry-credentials') {
+                            docker.image("${FULL_IMAGE}").push()
+                        }
                     }
                 }
             }
@@ -35,14 +39,16 @@ pipeline {
 
         stage('Deploy con Ansible') {
             steps {
-                ansiblePlaybook(
-                    playbook: 'deploy.yml',
-                    inventory: 'inventory-jenkins.ini',
-                    credentialsId: 'target-ssh-key',
-                    extraVars: [
-                        app_tag: "${IMAGE_TAG}"
-                    ]
-                )
+                dir('step5') {
+                    ansiblePlaybook(
+                        playbook: 'deploy.yml',
+                        inventory: 'inventory-jenkins.ini',
+                        credentialsId: 'target-ssh-key',
+                        extraVars: [
+                            app_tag: "${IMAGE_TAG}"
+                        ]
+                    )
+                }
             }
         }
     }
