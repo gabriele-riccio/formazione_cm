@@ -1,0 +1,60 @@
+---
+- name: Effettuo il Deploy dell'immagine sul container target via SSH
+  hosts: target
+  gather_facts: false
+
+  vars:
+    registry_host: "host.docker.internal:5000"
+    registry_user: "admin"
+    registry_password: "Admin123"
+    app_image: "formazione-app"
+    app_tag: "1"
+    app_container: "formazione-app-running"
+    app_port: 2200
+
+  tasks:
+    - name: Assicuro la cartella di configurazione di Docker
+      ansible.builtin.file:
+        path: /etc/docker/
+        state: directory
+
+    - name: Dichiaro il registry come insecure (HTTP) nel daemon.json
+      ansible.builtin.copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {
+            "insecure-registries" : ["{{ registry_host }}"]
+          }
+      register: daemon_json
+
+    - name: Ricarico dockerd per applicare la configurazione (SIGHUP)
+      ansible.builtin.command: kill -HUP 1
+      when: daemon_json.changed
+    
+    - name: Attendo che dockerd sia di nuovo pronto
+      ansible.builtin.command: docker info
+      register: docker_ready
+      retries: 10
+      delay: 2
+      until: docker_ready.rc == 0
+      changed_when: false
+    
+    - name: Login al registry
+      community.docker.docker_login:
+        registry_url: "{{ registry_host }}"
+        username: "{{ registry_user }}"
+        password: "{{ registry_password }}"
+
+    - name: Pull dell'immagine app dal registry
+      community.docker.docker_image:
+        name: "{{ registry_host }}/{{ app_image }}:{{ app_tag }}"
+        source: pull
+
+    - name: Avvia il container dell'app
+      community.docker.docker_container:
+        name: "{{ app_container }}"
+        image: "{{ registry_host }}/{{ app_image }}:{{ app_tag }}"
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "{{ app_port }}:22"
